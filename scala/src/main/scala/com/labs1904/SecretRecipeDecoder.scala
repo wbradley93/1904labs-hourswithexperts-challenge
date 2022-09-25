@@ -55,8 +55,7 @@ object SecretRecipeDecoder {
    * @return
    */
   def decodeString(str: String): String = {
-    // todo: implement me
-    "1 cup"
+    str.flatMap(c => ENCODING.getOrElse(c.toString, c.toString))
   }
 
   /**
@@ -65,8 +64,8 @@ object SecretRecipeDecoder {
    * @return
    */
   def decodeIngredient(line: String): Ingredient = {
-    // todo: implement me
-    Ingredient("1 cup", "butter")
+    val split = line.split('#').map(s => decodeString(s))
+    Ingredient(split(0), split(1))
   }
 
   /**
@@ -74,6 +73,16 @@ object SecretRecipeDecoder {
    * @param args
    */
   def main(args: Array[String]): Unit = {
-    // TODO: implement me
+    val infile = "src/main/resources/secret_recipe.txt"
+    val recipeSource = scala.io.Source.fromFile(infile)
+
+    val recipe = recipeSource.getLines()
+    recipeSource.close()
+    
+    val decodedIngredients = recipe.map(i => decodeIngredient(i))
+
+    val pw = new java.io.PrintWriter(new java.io.File("src/main/resources/decoded_recipe.txt"))
+    decodedIngredients.foreach(i => pw.write(i.amount + " " + i.description + "\n"))
+    pw.close()
   }
 }
